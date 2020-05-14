@@ -1,0 +1,179 @@
+Microsoft (R) Macro Assembler Version 6.11		    10/30/19 13:13:02
+tempfile.asm						     Page 1 - 1
+
+
+ 0000				datas segment
+ 0000 64 00			    buff db 100,0,100 dup(0)  ;数据缓存�?
+       0064 [
+        00
+       ]
+ 0066  000A [			    outrec db 10 dup(0)     ;存放筛选后结果
+        00
+       ]
+ 0070 0000			    turns dw 0              ;记录字母个数
+ 0072 6F 75 74 70 75 74		    file_name db 'output1.txt',00H     ;文件�?
+       31 2E 74 78 74 00
+ 007E 0D 0A 45 52 52 4F		    create_err db 0DH,0AH,'ERROR:Fail to create file!','$'   ;创建文件错误
+       52 3A 46 61 69 6C
+       20 74 6F 20 63 72
+       65 61 74 65 20 66
+       69 6C 65 21 24
+ 009B 0D 0A 45 52 52 4F		    open_err db 0DH,0AH,'ERROR:Fail to open	file!','$'   ;打开文件错误
+       52 3A 46 61 69 6C
+       20 74 6F 20 6F 70
+       65 6E 09 66 69 6C
+       65 21 24
+ 00B6 0D 0A 45 52 52 4F		    write_err db 0DH,0AH,'ERROR:Fail to write file!','$'     ;写文件错�?
+       52 3A 46 61 69 6C
+       20 74 6F 20 77 72
+       69 74 65 20 66 69
+       6C 65 21 24
+ 00D2 0D 0A 45 52 52 4F		    close_err db 0DH,0AH,'ERROR:Fail to close file!','$'     ;关闭文件错误
+       52 3A 46 61 69 6C
+       20 74 6F 20 63 6C
+       6F 73 65 20 66 69
+       6C 65 21 24
+ 00EE 0000			    whandle dw ?            ;保存文件句柄
+ 00F0				datas ends
+ 0000				stack segment
+ 0000  0020 [			    dw 32 dup(?)
+        0000
+       ]
+ 0040				stack ends
+ 0000				codes segment
+				    assume cs:codes,ds:datas,ss:stack
+
+ 0000				start:
+ 0000  B8 ---- R		    mov ax,datas
+ 0003  8E D8			    mov ds,ax
+ 0005  B8 ---- R		    mov ax,stack
+ 0008  8E D0			    mov ss,ax
+ 000A  BC 0040			    mov sp,40h
+				    
+ 000D  8D 16 0000 R			lea dx,buff
+ 0011  B4 0A				mov ah,0ah
+ 0013  CD 21				int 21h	
+					
+ 0015  A0 0001 R			mov al,buff[1]
+ 0018  BB 0000				mov bx,0
+ 001B  BD 0000				mov bp,0
+ 001E				comp:
+ 001E  38 C3				cmp bl,al
+ 0020  74 2F				jz save
+ 0022  80 BF 0002 R 61			cmp buff[bx+2],'a'
+ 0027  72 25				jb fai
+ 0029  80 BF 0002 R 7A			cmp buff[bx+2],'z'
+ 002E  76 10				jna suc
+ 0030  80 BF 0002 R 41			cmp buff[bx+2],'A'
+ 0035  72 17				jb fai
+ 0037  80 BF 0002 R 5A			cmp buff[bx+2],'Z'
+ 003C  76 02				jna suc
+ 003E  EB 0E				jmp fai
+					
+ 0040				suc:
+ 0040  FF 06 0070 R			inc turns
+ 0044  8A A7 0002 R			mov ah,buff[bx+2]
+ 0048  3E: 88 A6 0066 R			mov outrec[bp],ah
+ 004D  45				inc bp
+ 004E				fai:
+ 004E  43				inc bx
+ 004F  EB CD				jmp comp
+					
+ 0051				save:
+ 0051  B4 3C				mov ah,3ch
+ 0053  B9 0000				mov cx,0
+ 0056  8D 16 0072 R			lea dx,file_name
+ 005A  CD 21				int 21h
+ 005C  72 2D				jc error1
+ 005E  B4 3D				mov ah,3dh
+ 0060  B0 01				mov al,1
+ 0062  8D 16 0072 R			lea dx,file_name
+ 0066  CD 21				int 21h
+ 0068  72 2B				jc error2
+ 006A  A3 00EE R			mov whandle,ax
+ 006D  B4 40				mov ah,40h
+ 006F  8B 1E 00EE R			mov bx,whandle
+ 0073  8B 0E 0070 R			mov cx,turns
+ 0077  8D 16 0066 R			lea dx,outrec
+ 007B  CD 21				int 21h
+ 007D  72 20				jc error3
+ 007F  B4 3E				mov ah,3eh
+ 0081  8B 1E 00EE R			mov bx,whandle
+ 0085  CD 21				int 21h
+ 0087  72 20				jc error4
+ 0089  EB 28				jmp exit
+					
+ 008B				error1:
+ 008B  8D 16 007E R			LEA DX , create_err
+ 008F  B4 09				MOV AH , 9
+ 0091  CD 21				INT 21H
+ 0093  EB 1E				jmp exit
+					
+ 0095				error2:
+ 0095  8D 16 009B R			LEA DX , open_err
+ 0099  B4 09				MOV AH , 9
+ 009B  CD 21				INT 21H
+ 009D  EB 14				jmp exit
+					
+ 009F				error3:
+ 009F  8D 16 00B6 R			LEA DX , write_err
+ 00A3  B4 09				MOV AH , 9
+ 00A5  CD 21				INT 21H
+ 00A7  EB 0A				jmp exit
+					
+ 00A9				error4:
+ 00A9  8D 16 00D2 R			LEA DX , close_err
+ 00AD  B4 09				MOV AH , 9
+ 00AF  CD 21				INT 21H
+ 00B1  EB 00				jmp exit
+					
+					
+ 00B3				exit:
+ 00B3  B4 4C			    mov ah,4ch
+ 00B5  CD 21			    int 21h
+
+ 00B7				codes ends
+
+
+tempfile.asm(109): error A2088: END directive required at end of file
+Microsoft (R) Macro Assembler Version 6.11		    10/30/19 13:13:02
+tempfile.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+codes  . . . . . . . . . . . . .	16 Bit	 00B7	  Para	  Private 
+datas  . . . . . . . . . . . . .	16 Bit	 00F0	  Para	  Private 
+stack  . . . . . . . . . . . . .	16 Bit	 0040	  Para	  Private 
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+buff . . . . . . . . . . . . . .	Byte	 0000	  datas	
+close_err  . . . . . . . . . . .	Byte	 00D2	  datas	
+comp . . . . . . . . . . . . . .	L Near	 001E	  codes	
+create_err . . . . . . . . . . .	Byte	 007E	  datas	
+error1 . . . . . . . . . . . . .	L Near	 008B	  codes	
+error2 . . . . . . . . . . . . .	L Near	 0095	  codes	
+error3 . . . . . . . . . . . . .	L Near	 009F	  codes	
+error4 . . . . . . . . . . . . .	L Near	 00A9	  codes	
+exit . . . . . . . . . . . . . .	L Near	 00B3	  codes	
+fai  . . . . . . . . . . . . . .	L Near	 004E	  codes	
+file_name  . . . . . . . . . . .	Byte	 0072	  datas	
+open_err . . . . . . . . . . . .	Byte	 009B	  datas	
+outrec . . . . . . . . . . . . .	Byte	 0066	  datas	
+save . . . . . . . . . . . . . .	L Near	 0051	  codes	
+start  . . . . . . . . . . . . .	L Near	 0000	  codes	
+suc  . . . . . . . . . . . . . .	L Near	 0040	  codes	
+turns  . . . . . . . . . . . . .	Word	 0070	  datas	
+whandle  . . . . . . . . . . . .	Word	 00EE	  datas	
+write_err  . . . . . . . . . . .	Byte	 00B6	  datas	
+
+	   0 Warnings
+	   1 Errors

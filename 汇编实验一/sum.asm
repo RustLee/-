@@ -1,0 +1,47 @@
+DATAS SEGMENT
+	X DB 24
+	Y DB 6
+	A DB 25
+	Z DB ?
+    ;此处输入数据段代码  
+DATAS ENDS
+
+STACKS SEGMENT
+	DB 128 DUP(?)
+    ;此处输入堆栈段代码
+STACKS ENDS
+
+CODES SEGMENT
+    ASSUME CS:CODES,DS:DATAS,SS:STACKS
+START:
+    MOV AX,DATAS
+    MOV DS,AX
+    ;此处输入代码段代码
+	MOV AH,X
+	MOV AL,2
+	MUL AH 
+	;求出2X
+	MOV CX,AX
+	MOV BH,Y
+	MOV AL,5
+	MUL BH
+	;求出5Y
+	ADD CX,AX
+	;求出2X+5Y
+	MOV DH,A
+	MOV AL,3
+	MUL DH
+	SUB CX,AX
+	;求出3A并与前面相减
+	ADD CX,30H
+	MOV Z,CL
+	
+	MOV DX,CX
+	MOV AH,02
+	INT 21H
+	;输出Z
+	INT 3
+    MOV AH,4CH
+    INT 21H
+CODES ENDS
+    END START

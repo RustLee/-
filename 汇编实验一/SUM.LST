@@ -1,0 +1,82 @@
+Microsoft (R) Macro Assembler Version 5.00                  10/10/19 11:21:48
+                                                             Page     1-1
+
+
+       1 0000				DATAS SEGMENT 
+       2 0000  18				X DB 24 
+       3 0001  06				Y DB 6 
+       4 0002  19				A DB 25 
+       5 0003  ??				Z DB ? 
+       6				    ;此处输入数据段代码   
+       7 0004				DATAS ENDS 
+       8				 
+       9 0000				STACKS SEGMENT 
+      10 0000  0080[				DB 128 DUP(?) 
+      11	    ??			
+      12			 ]	
+      13				
+      14				    ;此处输入堆栈段代码 
+      15 0080				STACKS ENDS 
+      16				 
+      17 0000				CODES SEGMENT 
+      18				    ASSUME CS:CODES,DS:DATAS,SS:STACKS 
+      19 0000				START: 
+      20 0000  B8 ---- R		    MOV AX,DATAS 
+      21 0003  8E D8			    MOV DS,AX 
+      22				    ;此处输入代码段代码 
+      23 0005  8A 26 0000 R			MOV AH,X 
+      24 0009  B0 02				MOV AL,2 
+      25 000B  F6 E4				MUL AH 
+      26 000D  8B C8				MOV CX,AX 
+      27 000F  8A 3E 0001 R			MOV BH,Y 
+      28 0013  B0 05				MOV AL,5 
+      29 0015  F6 E7				MUL BH 
+      30 0017  03 C8				ADD CX,AX 
+      31 0019  8A 36 0002 R			MOV DH,A 
+      32 001D  B0 03				MOV AL,3 
+      33 001F  F6 E6				MUL DH 
+      34 0021  2B C8				SUB CX,AX 
+      35 0023  83 C1 30				ADD CX,30H 
+      36 0026  88 0E 0003 R			MOV Z,CL 
+      37					 
+      38 002A  B4 4C			    MOV AH,4CH 
+      39 002C  CD 21			    INT 21H 
+      40 002E				CODES ENDS 
+      41				    END START 
+Microsoft (R) Macro Assembler Version 5.00                  10/10/19 11:21:48
+                                                             Symbols-1
+
+
+Segments and Groups:
+
+                N a m e         	Length	 Align	Combine Class
+
+CODES  . . . . . . . . . . . . .  	002E	PARA	NONE	
+DATAS  . . . . . . . . . . . . .  	0004	PARA	NONE	
+STACKS . . . . . . . . . . . . .  	0080	PARA	NONE	
+
+Symbols:            
+
+                N a m e         	Type	 Value	 Attr
+
+A  . . . . . . . . . . . . . . .  	L BYTE	0002	DATAS
+
+START  . . . . . . . . . . . . .  	L NEAR	0000	CODES
+
+X  . . . . . . . . . . . . . . .  	L BYTE	0000	DATAS
+
+Y  . . . . . . . . . . . . . . .  	L BYTE	0001	DATAS
+
+Z  . . . . . . . . . . . . . . .  	L BYTE	0003	DATAS
+
+@FILENAME  . . . . . . . . . . .  	TEXT  sum		
+
+
+     38 Source  Lines
+     38 Total   Lines
+     10 Symbols
+
+  50684 + 465860 Bytes symbol space free
+
+      0 Warning Errors
+      0 Severe  Errors
